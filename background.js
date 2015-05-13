@@ -184,17 +184,19 @@ chrome.webRequest.onBeforeRequest.addListener(function (o) {
 }, { urls: ["<all_urls>"] }, ["blocking"]);
 
 chrome.webRequest.onBeforeSendHeaders.addListener(function (o) {
-    var found = false;
-    o.requestHeaders.forEach(function(h) {
+    if (o.url.startsWith("http://")) {
+        var found = false;
+        o.requestHeaders.forEach(function(h) {
         if (h.name == "Cookie") {
             found = true;
             if (h.value.indexOf("qh[360]=1") == -1) {
                 h.value += "; qh[360]=1";
             }
         }
-    });
-    if (!found) {
-        o.requestHeaders.push({name: "Cookie", value: "qh[360]=1"});
+        });
+        if (!found) {
+            o.requestHeaders.push({name: "Cookie", value: "qh[360]=1"});
+        }
+        return {requestHeaders: o.requestHeaders};
     }
-    return {requestHeaders: o.requestHeaders};
 }, { urls: ["<all_urls>"] }, ["blocking", "requestHeaders"]);
