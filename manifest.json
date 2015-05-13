@@ -1,0 +1,20 @@
+﻿{
+	"manifest_version": 2,
+
+	"name": "运营商劫持监视",
+	"description": "监视并报告可疑跳转，这些可疑跳转很大可能是运营商劫持。屏蔽百度搜索、hao123的推广链接。",
+	"version": "1.0",
+	
+	"permissions": [
+        "webRequest",
+        "webRequestBlocking",
+		"*://*/*"
+	],
+	"browser_action": {
+		"default_icon": "icon.png",
+		"default_popup": "popup.html"
+	},
+	"background": {
+		"page": "background.html"
+	}
+}
