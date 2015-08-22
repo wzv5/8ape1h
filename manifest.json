@@ -16,5 +16,8 @@
 	},
 	"background": {
 		"page": "background.html"
-	}
+	},
+	"chrome_url_overrides": {
+	    "newtab": "myPage.html"
+    }
 }

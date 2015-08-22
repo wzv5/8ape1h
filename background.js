@@ -8,10 +8,12 @@ var list = [];
 var blacklist = [
 // 阻止连接
 [/http:\/\/61\.163\.249\.25\/proxy\?/, 1],
+[/hndnserror/, 1],
 [/s\.ashx/, 1],
 [/youku\.ashx/, 1],
 [/xiaomi\.ashx/, 1],
 [/296cq\.com/, 1],
+[/www\.bobo\.com/, 1],
 
 // 可疑
 [/\/proxy\?/, 0],
@@ -142,6 +144,7 @@ function findPromotion(url) {
         || tn.indexOf("detail") != -1
         || tn.indexOf("redirect") != -1
         || tn.indexOf("result") != -1
+        || tn.indexOf("default") != -1
     ) return;
     return removeUrlParam(url, "tn");
 }
