@@ -14,6 +14,7 @@ var blacklist = [
 [/xiaomi\.ashx/, 1],
 [/296cq\.com/, 1],
 [/www\.bobo\.com/, 1],
+[/mShow\.aspx\?AID=/, 1],
 
 // 可疑
 [/\/proxy\?/, 0],
