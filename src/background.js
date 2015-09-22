@@ -15,6 +15,8 @@ var blacklist = [
 [/296cq\.com/, 1],
 [/www\.bobo\.com/, 1],
 [/mShow\.aspx\?AID=/, 1],
+[/115\.28\.115\.68/, 1],
+[/\/ajs\/js\.php/, 1],
 
 // 可疑
 [/\/proxy\?/, 0],
