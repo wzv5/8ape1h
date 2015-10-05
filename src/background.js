@@ -6,6 +6,11 @@ var count = 0;
 var list = [];
 
 var blacklist = [
+
+// 针对js的重定向注入，重定向回原始地址
+// URL格式：http://222.186.190.85:8080/re?u=njck&url=URL编码的原始地址
+[/http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?\/re\?u=\S+?\&url=/, 2],
+
 // 阻止连接
 [/http:\/\/61\.163\.249\.25\/proxy\?/, 1],
 [/hndnserror/, 1],
@@ -17,11 +22,13 @@ var blacklist = [
 [/mShow\.aspx\?AID=/, 1],
 [/115\.28\.115\.68/, 1],
 [/\/ajs\/js\.php/, 1],
+[/222\.186\.190\.85/, 1],   // 2015.10.05：js loader
 
 // 可疑
 [/\/proxy\?/, 0],
 [/\.ashx/, 0],
-//[/http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\//, 0],
+[/http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?\//, 0],
+
 ];
 
 var whitelist = [
@@ -46,7 +53,7 @@ function findBlackList(url) {
     for (var i = 0; i < blacklist.length; i++)
     {
         if (blacklist[i][0].test(url))
-            return blacklist[i][1] ? 1 : -1;
+            return blacklist[i][1];
     }
     return 0;
 }
@@ -164,14 +171,27 @@ chrome.webRequest.onHeadersReceived.addListener(function (o) {
     
     setIconText(++count);
     var s = "可疑重定向：" + url + " => " + tourl;
+    var a = "";
     if (result == 1) {
-        s = "【已阻止】" + s;
-        chrome.webRequest.handlerBehaviorChanged();
+        a = "【已阻止】";
     }
+    else if (result == 2) {
+        a = "【已转回】";
+        
+    }
+    s = a + s;
     list.push(s);
     console.log(s);
     
-    return {cancel: result == 1};
+    chrome.webRequest.handlerBehaviorChanged();
+    if (result == 1)
+    {
+        return { cancel: true };
+    }
+    else if (result == 2)
+    {
+        return { redirectUrl: url + "?&target=no_follow" };
+    }
 }, { urls: ["<all_urls>"] }, ["blocking", "responseHeaders"]);
 
 chrome.webRequest.onBeforeRequest.addListener(function (o) {
@@ -188,21 +208,3 @@ chrome.webRequest.onBeforeRequest.addListener(function (o) {
         return {redirectUrl: tourl};
     }
 }, { urls: ["<all_urls>"] }, ["blocking"]);
-
-chrome.webRequest.onBeforeSendHeaders.addListener(function (o) {
-    if (o.url.startsWith("http://")) {
-        var found = false;
-        o.requestHeaders.forEach(function(h) {
-        if (h.name == "Cookie") {
-            found = true;
-            if (h.value.indexOf("qh[360]=1") == -1) {
-                h.value += "; qh[360]=1";
-            }
-        }
-        });
-        if (!found) {
-            o.requestHeaders.push({name: "Cookie", value: "qh[360]=1"});
-        }
-        return {requestHeaders: o.requestHeaders};
-    }
-}, { urls: ["<all_urls>"] }, ["blocking", "requestHeaders"]);
