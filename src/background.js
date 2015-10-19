@@ -8,8 +8,11 @@ var list = [];
 var blacklist = [
 
 // 针对js的重定向注入，重定向回原始地址
-// URL格式：http://222.186.190.85:8080/re?u=njck&url=URL编码的原始地址
+// URL格式：
+// http://222.186.190.85:8080/re?u=njck&url=URL编码的原始地址
+// http://115.28.115.68:8016/ajsNew/js.php?url=URL编码的原始地址&adf=g2
 [/http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?\/re\?u=\S+?\&url=/, 2],
+[/http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?\/ajsNew\/js\.php\?url=/, 2],
 
 // 阻止连接
 [/http:\/\/61\.163\.249\.25\/proxy\?/, 1],
@@ -28,7 +31,7 @@ var blacklist = [
 [/\/proxy\?/, 0],
 [/\.ashx/, 0],
 [/http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?\//, 0],
-
+[/url=/, 0]
 ];
 
 var whitelist = [
@@ -55,7 +58,7 @@ function findBlackList(url) {
         if (blacklist[i][0].test(url))
             return blacklist[i][1];
     }
-    return 0;
+    return -1;
 }
 
 function getRedirectUrl(headers) {
@@ -167,7 +170,7 @@ chrome.webRequest.onHeadersReceived.addListener(function (o) {
         return;
     if (findWhiteList(tourl)) return;
     var result = findBlackList(tourl);
-    if (result == 0) return;
+    if (result == -1) return;
     
     setIconText(++count);
     var s = "可疑重定向：" + url + " => " + tourl;
@@ -183,14 +186,15 @@ chrome.webRequest.onHeadersReceived.addListener(function (o) {
     list.push(s);
     console.log(s);
     
-    chrome.webRequest.handlerBehaviorChanged();
     if (result == 1)
     {
+        chrome.webRequest.handlerBehaviorChanged();
         return { cancel: true };
     }
     else if (result == 2)
     {
-        return { redirectUrl: url + "?&target=no_follow" };
+        chrome.webRequest.handlerBehaviorChanged();
+        return { redirectUrl: url /*+ "?&target=no_follow"*/ };
     }
 }, { urls: ["<all_urls>"] }, ["blocking", "responseHeaders"]);
 
